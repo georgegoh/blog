@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+        <meta charset="utf-8" />
+        <title>George Goh - cloud-native</title>
+        <link rel="stylesheet" href="http://georgegoh.github.io/theme/css/main.css" />
+        <link href="http://georgegoh.github.io/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="George Goh Atom Feed" />
+
+        <!--[if IE]>
+            <script src="https://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+        <![endif]-->
+</head>
+
+<body id="index" class="home">
+        <header id="banner" class="body">
+                <h1><a href="http://georgegoh.github.io/">George Goh </a></h1>
+                <nav><ul>
+                    <li><a href="http://georgegoh.github.io/category/conferences.html">conferences</a></li>
+                </ul></nav>
+        </header><!-- /#banner -->
+
+            <aside id="featured" class="body">
+                <article>
+                    <h1 class="entry-title"><a href="http://georgegoh.github.io/kubecon-eu-2018-pt1.html">KubeCon Copenhagen 2018 (part 1)</a></h1>
+<footer class="post-info">
+        <abbr class="published" title="2018-05-04T00:00:00+08:00">
+                Published: Fri 04 May 2018
+        </abbr>
+
+        <address class="vcard author">
+                By                         <a class="url fn" href="http://georgegoh.github.io/author/george-goh.html">George Goh</a>
+        </address>
+<p>In <a href="http://georgegoh.github.io/category/conferences.html">conferences</a>.</p>
+<p>tags: <a href="http://georgegoh.github.io/tag/kubecon.html">kubecon</a> <a href="http://georgegoh.github.io/tag/kubernetes.html">kubernetes</a> <a href="http://georgegoh.github.io/tag/conference.html">conference</a> <a href="http://georgegoh.github.io/tag/cloud-native.html">cloud-native</a> </p>
+</footer><!-- /.post-info --><div id="preamble">
+<div class="sectionbody">
+<div class="paragraph">
+<p>KubeCon in Europe this year was held in the city of Copenhagen in Denmark,
+spanning 3 days from 2-4 May (with an additional workshop day on 1 May).</p>
+</div>
+<div class="paragraph">
+<p>This is part 1 of a multi-part report on my time at the conference.</p>
+</div>
+</div>
+</div>
+<h1 id="_pre_show_event_openshift_commons_gathering" class="sect0">Pre-show event: OpenShift Commons Gathering</h1>
+<div id="commons-gathering-eu-2018" class="imageblock">
+<div class="content">
+<img src="images/commons-gathering-eu-2018.jpg" alt="OpenShift Commons Gathering in Copenhagen 2018" width="100%">
+</div>
+<div class="title">Figure 1. OpenShift Commons Gathering in Copenhagen 2018</div>
+</div>
+<div class="paragraph">
+<p>OpenShift Commons is a place for sharing of knowledge, experiences and practices
+among users, partners, customers and contributors of OpenShift.</p>
+</div>
+<div class="paragraph">
+<p>Red Hat has been organizing OpenShift Commons Gatherings for the past few years
+as a 'mini-conference' before each KubeCon, sharing customer case studies,
+technology and roadmap updates, and panel discussions over the Cloud Native landscape.</p>
+</div>
+<div class="paragraph">
+<p>Topics in this session included:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Kubernetes Operator framework</p>
+<div class="ulist">
+<ul>
+<li>
+<p><a href="https://github.com/operator-framework" class="bare">https://github.com/operator-framework</a></p>
+</li>
+<li>
+<p>The problem that the Operator framework is addressing is the 'day 2'
+operations of applications such as updates, backups and scaling of a suite
+of software (consider how this applies to an etcd cluster&#8217;s creation,
+adding/removing members, upgrades, etc).</p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<p>Machine Learning frameworks and use cases</p>
+<div class="ulist">
+<ul>
+<li>
+<p>JupyterHub</p>
+</li>
+<li>
+<p>seldon-core</p>
+</li>
+<li>
+<p>radanalytics.io</p>
+</li>
+<li>
+<p>Pachyderm, ML/AI workflows, repeatability and compliance</p>
+</li>
+<li>
+<p>Kubeflow</p>
+</li>
+<li>
+<p>Repeatability in Data Science</p>
+</li>
+</ul>
+</div>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>The following is a recording of the entire session, and I think it&#8217;s well worth
+watching:</p>
+</div>
+<div id="opernshift-commons-gathering-eu-2018-video" class="videoblock">
+<div class="title">OpenShift Commons Gathering EU 2018</div>
+<div class="content">
+<iframe src="https://www.youtube.com/embed/-yBC_bA5ABk?rel=0" frameborder="0" allowfullscreen></iframe>
+</div>
+</div>
+<h1 id="_kubecon_first_impressions_exponential_growth" class="sect0">KubeCon First impressions - exponential growth</h1>
+<div class="paragraph">
+<p>When I attended the 2017 KubeCon EU in Berlin last year, it was well-attended.</p>
+</div>
+<div id="kubecon-berlin-2017" class="imageblock">
+<div class="content">
+<img src="images/kubecon-berlin-2017.jpg" alt="Last year at KubeCon Berlin" width="100%">
+</div>
+<div class="title">Figure 2. KubeCon in Berlin 2017</div>
+</div>
+<div class="paragraph">
+<p>But this year was phenomenal. The size of the main event hall felt 3 times
+larger than the previous year.</p>
+</div>
+<div id="kubecon-cph-2018" class="imageblock">
+<div class="content">
+<img src="images/kubecon-cph-2018-0.jpg" alt="KubeCon Copenhagen 2018" width="100%">
+</div>
+<div class="title">Figure 3. KubeCon in Copenhagen 2018</div>
+</div>
+<div class="paragraph">
+<p>And sure enough, this was confirmed by Dan Kohn&#8217;s keynote.</p>
+</div>
+<div id="kubecon-cph-2018-dan-kohn-attendees" class="imageblock">
+<div class="content">
+<img src="images/kubecon-cph-2018-dan-kohn-attendees.jpg" alt="KubeCon Copenhagen 2018 Attendees" width="100%">
+</div>
+<div class="title">Figure 4. Attendees in KubeCon Copenhagen 2018</div>
+</div>
+<div class="paragraph">
+<p>At about 4300 attendees, KubeCon in Copenhagen boasts the highest attendance
+ever, almost triple the number who attended the Berlin event in 2017. The
+conference program also grew from 8 concurrent tracks over 2.5 days in 2017,
+to 14 over 3.5 days in 2018.</p>
+</div>
+<div class="paragraph">
+<p>Dan&#8217;s keynote also mentioned how fast the Cloud native Landscape was growing.</p>
+</div>
+<div id="kubecon-cph-2018-dan-kohn-cncf-landscape" class="imageblock">
+<div class="content">
+<a class="image" href="https://github.com/cncf/landscape/raw/master/landscape/CloudNativeLandscape_latest.png"><img src="https://github.com/cncf/landscape/raw/master/landscape/CloudNativeLandscape_latest.png" alt="Cloud Native Landscape" width="100%"></a>
+</div>
+<div class="title">Figure 5. CNCF Landscape</div>
+</div>
+<div class="paragraph">
+<p>And also introduced the interactive Cloud Native Landscape at <a href="https://landscape.cncf.io/" class="bare">https://landscape.cncf.io/</a>.</p>
+</div>
+<div class="paragraph">
+<p>See the rest of his keynote <a href="https://docs.google.com/presentation/d/1ANqkYOILKmyU5M3fMjMbH9JfW7M87L3QaaOktEQGa7w/edit#slide=id.p10">here</a>.</p>
+</div>
+<div class="videoblock">
+<div class="title">Cloud Native Landscape Intro</div>
+<div class="content">
+<iframe src="https://www.youtube.com/embed/_CFgSksTT54?rel=0" frameborder="0" allowfullscreen></iframe>
+</div>
+</div>
+<h1 id="_keynotes" class="sect0">Keynotes</h1>
+<div class="paragraph">
+<p>I&#8217;m not going to describe every keynote in detail, but only the ones that resonated with me:</p>
+</div>
+<div class="sect1">
+<h2 id="_anatomy_of_a_production_kubernetes_outage">Anatomy of a Production Kubernetes Outage</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p><em>Oliver Beattie, Head of Engineering, Monzo Bank</em></p>
+</div>
+<div class="videoblock">
+<div class="content">
+<iframe src="https://www.youtube.com/embed/OUYTNywPk-s?rel=0" frameborder="0" allowfullscreen></iframe>
+</div>
+</div>
+<div class="paragraph">
+<p>Oliver walked through a production outage that Monzo experienced in 2017.</p>
+</div>
+<div class="paragraph">
+<p>Current account customers were experiencing payment failures after the
+deployment of a new service. However, even after rolling back the deployment,
+the failures remained and the outage continued.</p>
+</div>
+<div class="paragraph">
+<p>Eventually, the failure was traced back to an incompatibility of the version of
+linkerd that they were using, and their version of Kubernetes(see
+<a href="https://github.com/linkerd/linkerd/issues/1219" class="bare">https://github.com/linkerd/linkerd/issues/1219</a>).</p>
+</div>
+<div class="paragraph">
+<p>I&#8217;m glossing over a lot of details here - more can be found at the following
+links:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Presentation: <a href="https://kccnceu18.sched.com/event/Dsan/keynote-anatomy-of-a-production-kubernetes-outage-oliver-beattie-head-of-engineering-monzo-bank" class="bare">https://kccnceu18.sched.com/event/Dsan/keynote-anatomy-of-a-production-kubernetes-outage-oliver-beattie-head-of-engineering-monzo-bank</a></p>
+</li>
+<li>
+<p>Detailed Blog: <a href="https://community.monzo.com/t/resolved-current-account-payments-may-fail-major-outage-27-10-2017/26296/95?u=oliver" class="bare">https://community.monzo.com/t/resolved-current-account-payments-may-fail-major-outage-27-10-2017/26296/95?u=oliver</a></p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_switching_horses_midstream_the_challenge_of_migrating_150_services_to_kubernetes">Switching horses midstream: the challenge of migrating 150+ services to kubernetes</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p><em>Sarah Wells, Technical Director for Operations and Reliability, Financial Times</em></p>
+</div>
+<div class="videoblock">
+<div class="content">
+<iframe src="https://www.youtube.com/embed/H06qrNmGqyE?rel=0" frameborder="0" allowfullscreen></iframe>
+</div>
+</div>
+<div class="paragraph">
+<p>FT started their container journey in 2015, starting with home-grown orchestration
+for their containers.</p>
+</div>
+<div class="paragraph">
+<p>I liked this presentation for the architecture and roadmap described.</p>
+</div>
+<div class="paragraph">
+<p>Because of the legacy Docker architecture, FT chose to go with a parallel
+deployment approach - deploying releases to both their existing infra <strong>and</strong>
+to Kubernetes. At first, they had code in separate branches - one for legacy,
+one for Kubernetes. However, they quickly found it difficult to manage merging
+the separate branches containing the different deployment mechanisms to the two
+stacks, and ended up using if/else conditions instead.</p>
+</div>
+<div class="paragraph">
+<p>A lot of details in the talk. Highly recommended watching.</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Presentation: <a href="https://kccnceu18.sched.com/event/Dsh7/keynote-switching-horses-midstream-the-challenges-of-migrating-150-microservices-to-kubernetes-sarah-wells-technical-director-for-operations-and-reliability-financial-times" class="bare">https://kccnceu18.sched.com/event/Dsh7/keynote-switching-horses-midstream-the-challenges-of-migrating-150-microservices-to-kubernetes-sarah-wells-technical-director-for-operations-and-reliability-financial-times</a></p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p><em>(to be continued)</em></p>
+</div>
+</div>
+</div>
+                </article>
+            </aside><!-- /#featured -->
+        <section id="extras" class="body">
+                <div class="social">
+                        <h2>social</h2>
+                        <ul>
+                            <li><a href="http://georgegoh.github.io/feeds/all.atom.xml" type="application/atom+xml" rel="alternate">atom feed</a></li>
+
+                        </ul>
+                </div><!-- /.social -->
+        </section><!-- /#extras -->
+
+        <footer id="contentinfo" class="body">
+                <address id="about" class="vcard body">
+                Proudly powered by <a href="http://getpelican.com/">Pelican</a>, which takes great advantage of <a href="http://python.org">Python</a>.
+                </address><!-- /#about -->
+
+                <p>The theme is by <a href="http://coding.smashingmagazine.com/2009/08/04/designing-a-html-5-layout-from-scratch/">Smashing Magazine</a>, thanks!</p>
+        </footer><!-- /#contentinfo -->
+
+</body>
+</html>
