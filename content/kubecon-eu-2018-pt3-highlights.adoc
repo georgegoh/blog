@@ -1,0 +1,85 @@
+= KubeCon EU 2018 in Copenhagen (part 3)
+
+:title: KubeCon Copenhagen 2018 (part 3)
+:date: 2018-05-07
+:tags: kubecon, kubernetes, conference, cloud-native, keynotes
+:slug: kubecon-eu-2018-pt3-highlights
+:authors: George Goh
+:summary: Highlights of KubeCon EU 2018
+
+KubeCon in Europe this year was held in the city of Copenhagen in Denmark, 
+spanning 3 days from 2-4 May (with an additional workshop day on 1 May).
+
+This is part 3 of a multi-part report on my time at the conference. I cover the
+highlights(for me) of the conference in this post. In this series, I'll cover the 
+pre-show, keynotes, topics of interest, and last, but not least, hallway 
+conversations in the conference!
+
+= Conference Highlights 
+
+On of the best things about attending a conference as large as KubeCon is the
+quality and volume of content. The obvious problem with this, is that there 
+were often multiple talks that I wanted to attend, that were all happening 
+at the same time.
+
+The highlights in this post reflect the topics that I'm interested in, but are 
+also influenced by what talks I could attend.
+
+== Code Quality
+
+Dan Kohn link:https://kccnceu18.sched.com/event/DurL/keynote-how-good-is-our-code-dan-kohn-executive-director-cloud-native-computing-foundation[talked]
+about software code quality, and how important it is to incorporate testing and
+continuous integration into the software development process. He emphasized his
+point using link:https://www.sqlite.org[SQLite] as an example, where even with 
+100% branch test coverage, millions of test cases, and about 1000x as much
+test code as product code, a security-oriented link:https://en.wikipedia.org/wiki/Fuzzing['fuzzer']
+named link:http://lcamtuf.coredump.cx/afl/[American Fuzzy Lop] found 
+link:https://lcamtuf.blogspot.dk/2015/04/finding-bugs-in-sqlite-easy-way.html[22 crashing test cases]
+in the software.
+
+I think this slide says it all:
+
+image::/images/dan-kohn-ci.png[Continuous integration is the answer,100%]
+
+Elsewhere in the conference, link:https://github.com/GoogleContainerTools/skaffold[skaffold]
+was a hot topic, as Google shared their Continuous Development approach using this.
+
+James Strachan from CloudBees also 
+link:https://kccnceu18.sched.com/event/Dquk/jenkins-x-easy-cicd-for-kubernetes-james-strachan-cloudbees-intermediate-skill-level[presented]
+on link:https://jenkins-x.io/[Jenkins X], a new project that offers automated CI and CD
+pipelines, previews, and GitOps style environment promotions.
+
+== User Stories
+
+=== Adidas
+
+Daniel Eichten(adidas) and Oliver Thylmann(Giant Swarm) shared the Adidas'
+experience of moving to Kubernetes.
+
+In 2013, Adidas was moving from a hosting provider back into an internal 
+data center. Their initial course of action was to get a quote for the migration
+from their suppliers and partners, but the costs were just too high, because
+moving an application consisted of many manual steps, which added to complexity
+of implementation.
+
+image::/images/adidas-raise-requests.png[Screenshot of raising requests]
+
+Docker was identified as a potential technology to reduce the cost of the move,
+but was not supported at that time by Red Hat(Adidas' corporate platform 
+standard), so their first cut of the data center move was done using Puppet
+to orchestrate VMs.
+
+Fast forward to 2015, and the following blocks fell into place:
+
+* Kubernetes 1.0 
+link::https://conferences.oreilly.com/oscon/open-source-2015/public/content/kubernetes-launch-event[launched]
+* Docker supported by Red Hat
+* Michael Vogele named as CIO, and he was keen to try new things and not afraid of failure.
+
+Initially picking a smaller market with fewer users(Finland), Adidas built their Kubernetes
+cluster to serve the frontend for the Finland site. This allowed their in-house engineers
+to build up expertise and confidence in operating these clusters on AWS.
+
+Today Adidas' frontend across all their geographies is served by Kubernetes clusters.
+
+_to be continued_

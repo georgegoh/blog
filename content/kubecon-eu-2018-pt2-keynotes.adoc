@@ -1,0 +1,80 @@
+= KubeCon EU 2018 in Copenhagen (part 2)
+
+:title: KubeCon Copenhagen 2018 (part 2)
+:date: 2018-05-04
+:tags: kubecon, kubernetes, conference, cloud-native, keynotes
+:slug: kubecon-eu-2018-pt2-keynotes
+:authors: George Goh
+:summary: Keynotes at KubeCon EU 2018
+
+KubeCon in Europe this year was held in the city of Copenhagen in Denmark, 
+spanning 3 days from 2-4 May (with an additional workshop day on 1 May).
+
+This is part 2 of a multi-part report on my time at the conference. I cover the
+keynotes in this post. In this series, I'll cover the pre-show, keynotes, topics of 
+interest, and last, but not least, hallway conversations in the conference!
+
+= Keynotes 
+
+I'm not going to describe every keynote in detail, but only the ones that resonated with me:
+
+== Anatomy of a Production Kubernetes Outage
+_Oliver Beattie, Head of Engineering, Monzo Bank_
+
+video::OUYTNywPk-s[youtube]
+
+Oliver walked through a production outage that Monzo experienced in 2017. 
+
+Current account customers were experiencing payment failures after the
+deployment of a new service. However, even after rolling back the deployment,
+the failures remained and the outage continued.
+
+Eventually, the failure was traced back to an incompatibility of the version of
+linkerd that they were using, and their version of Kubernetes(see 
+https://github.com/linkerd/linkerd/issues/1219).
+
+I'm glossing over a lot of details here - more can be found at the following
+links:
+
+* Presentation: https://kccnceu18.sched.com/event/Dsan/keynote-anatomy-of-a-production-kubernetes-outage-oliver-beattie-head-of-engineering-monzo-bank
+* Detailed Blog: https://community.monzo.com/t/resolved-current-account-payments-may-fail-major-outage-27-10-2017/26296/95?u=oliver
+
+== Switching horses midstream: the challenge of migrating 150+ services to kubernetes
+_Sarah Wells, Technical Director for Operations and Reliability, Financial Times_
+
+video::H06qrNmGqyE[youtube]
+
+FT started their container journey in 2015, starting with home-grown orchestration
+for their containers.
+
+I liked this presentation for the architecture and roadmap described.
+
+Because of the legacy Docker architecture, FT chose to go with a parallel
+deployment approach - deploying releases to both their existing infra *and*
+to Kubernetes. At first, they had code in separate branches - one for legacy,
+one for Kubernetes. However, they quickly found it difficult to manage merging 
+the separate branches containing the different deployment mechanisms to the two 
+stacks, and ended up using if/else conditions instead. 
+
+FT also had a slide showing the 3-year cost of ownership.
+
+image::/images/ft-reduction-cost.png[FT reduction in hosting and support costs,100%]
+
+Going to Kubernetes reduced the cost of hosting by almost 50%, due to the
+increased efficiency afforded by moving from VM-based, and home-grown Docker
+workloads towards container-based Kubernetes workloads. Support costs also
+decreased by a significant proportion - FT could leverage on the expertise
+and work from the Kubernetes community, where previously, only tribal knowledge
+existed to help architect, deploy and run their custom solution.
+
+Assuming migration costs reduce significantly over time as applications become
+increasingly Kubernetes-native, the figure suggests that total cost of ownership
+on Kubernetes would be 50% less compared to their old stack after the 3 years of
+initial migration.
+
+A lot more details in the talk. Highly recommended watching.
+
+* Presentation: https://kccnceu18.sched.com/event/Dsh7/keynote-switching-horses-midstream-the-challenges-of-migrating-150-microservices-to-kubernetes-sarah-wells-technical-director-for-operations-and-reliability-financial-times
+
+== More...
+See <<kubecon-eu-2018-pt3-highlights.adoc#,Part 3>> of my notes on the keynotes at KubeCon EU 2018.
