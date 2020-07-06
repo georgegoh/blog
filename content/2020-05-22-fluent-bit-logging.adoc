@@ -1,61 +1,387 @@
 = Fluent-bit logging in Kubernetes
 
-:title: Fluent-bit logging in Kubernetes
-:date: 2020-05-22
-:tags: kubernetes, observability, cloud-native, fluent-bit, fluentd, elasticsearch
+:title: Fluent-bit logging in Kubernetes, pt.1
+:date: 2020-07-06
+:tags: kubernetes, observability, cloud-native, fluent-bit, fluentd, elasticsearch, kibana, cerebro
 :slug: fluent-bit-logging
 :authors: George Goh
 :summary: Logging in Kubernetes
 :status: draft
 
-Fluent Bit is a fast and lightweight log processor, stream processor and 
-forwarder. It's gained popularity as the younger sibling of Fluentd due
-to its tiny memory footprint(~450KB compared to Fluentd's ~40MB), and
-zero dependencies - making it ideal for cloud and edge computing use cases.
+Fluent Bit is a fast and lightweight log processor, stream processor and forwarder. It’s gained popularity as the younger sibling of Fluentd due to its tiny memory footprint(~650KB compared to Fluentd’s ~40MB), and zero dependencies - making it ideal for cloud and edge computing use cases.
 
-In this post, I'll share my research, issues and workarounds in getting a
-lab set up for logging in a single Kubernetes cluster.
+In this series of posts, I'll share my research, issues and workarounds in getting a lab set up for logging in a single Kubernetes cluster. I'll also share techniques to separate logs by namespaces.
 
 == High-level overview
 
-First, let's look at the big picture:
+As a lightweight component of the logging infrastructure, Fluent Bit can ship logs directly to many destinations. As of today, there are 21 output plugins listed on the link:https://docs.fluentbit.io/manual/pipeline/outputs[Fluent Bit website]. However, Fluent Bit alone may not be sufficient for certain use cases.
 
-image::/images/fluent-bit-big-picture.png[Logging Pipeline Big Picture,100%]
+A common request seen in the field is to ship platform logs and application logs to different destinations and also augment the log record's fields with additional metadata. This guide documents a conceptual architecture to achieve this, and steps to deploy a MVP that demonstrates the use case.
 
-From the left, we see a single Kubernetes cluster which has a fluent-bit pod 
-running on each node as part of a Daemonset, picking up logs from 
-`/var/log/containers/*.log` on each node. The fluent-bit pods forward these logs
-to an external Fluentd node.
+== Logging Architecture
 
-The external Fluentd node aggregates logs from the all the fluent-bit instances.
-It's configured to post-process and create additional indexes to separate
-application logs(kube.\*) from system logs(kube-ops.*), which are then sent
-on to an Elasticsearch instance.
+Reading the following diagram from left to right, Fluent Bit is deployed as a Daemonset in the Kubernetes cluster. The Fluent Bit pods are configured to read directly from the node's `/var/log/containers/\*.log` files, and must be given the appropriate permissions to do so(and with no other privileges). These logs are then decorated with Kubernetes metadata such as pod name, namespace, and so on, using the Fluent Bit link:https://docs.fluentbit.io/manual/pipeline/filters/kubernetes[kubernetes filter plugin]. At this stage, all output from Fluent Bit is tagged with a `kube.*` tag, in a single stream, and shipped using the `forward` plugin to Fluentd.
 
-Elasticsearch and Kibana sit on the same node and the `Log Viewer` user accesses
-logs through the Kibana web UI. A `Elasticsearch Ops` user can use a tool like
-cerebro to view the status of Elasticsearch(node health, indexes, storage, and
-so on).
+Fluentd is deployed as a StatefulSet, exposed internally within Kubernetes cluster as a Service called `fluentd-headless`. The incoming log entries from Fluent Bit are tagged with application(`kube.\*`) or platform operations(`kube-ops.*`), using the `rewrite_tag_filter` plugin. These entries are then routed to their respective storage destination via their new tags. In this sample architecture, the storage destination happens to be Elasticsearch for all indices. In the wild, there could be unique and/or multiple destinations for each index - for example, application logs are sent to Elasticsearch, and platform operations logs are sent to LogInsight, and each type of log has a different retention period on the storage backend.
 
-In the following sections, we'll be building up the architecture in the above
-diagram, going from left to right.
+Elasticsearch is deployed external to the cluster, instead of inside Kubernetes. Having an external Elasticsearch instance to view platform operations logs could be useful for triage, if the Kubernetes cluster happens to be unavailable.
 
-=== Fluent Bit
+Finally, there are two points of access. First is the log viewer, who views logs through the Kibana web UI. Then there is the Elasticsearch operator, who uses Cerebro to view Elasticsearch health.
 
-Fluent Bit has a well-documented link:https://docs.fluentbit.io/manual/concepts/data-pipeline[data pipeline]. The plugins used in each stage of this pipeline are
-as shown below:
+image:/images/fluent-bit-fluentd-es-arch.drawio.svg[Logging Arch,100%]
 
-image::/images/fluent-bit-pipeline.png[fluent-bit Logging Pipeline,100%]
+=== Design Considerations
 
-We'll use link:https://helm.sh[helm] to deploy this.
+==== Fluent Bit Memory Footprint and CPU Utilization
 
-==== Prerequisites
-* helm3 - https://helm.sh
+We have deployed both Fluent Bit and Fluentd in this architecture. The assumption is that we want to capitalize on the small CPU and memory footprint of Fluent Bit, while leveraging on the large plugin ecosystem available for Fluentd. There are also situations where removing the Fluentd aggregator makes sense too - balance your decision with the functionality required in your use case.
 
-==== Deploy Fluent Bit
+image::/images/fluentd-v-fluent-bit.png[Fluentd vs Fluent Bit]
+
+As seen above, the memory footprint for Fluentd can be ~60x of Fluent Bit.
+
+The architecture in this document is a complementary pattern where Fluent Bit is deployed as a Daemonset(taking up a small footprint) to forward logs to a small number of Fluentd pods(deployed as a StatefulSet). The Fluentd `rewrite_tag_filter` and `elasticsearch_dynamic` plugins are then used to conditionally re-tag incoming log messages, to enable routing decisions to be made for where to store these logs.
+
+== Deployment
+
+While the architecture was described left-to-right(in the order of the flow of logs) above, the deployment will be performed right-to-left(starting from the log store). This is done to avoid Fluent Bit and Fluentd emitting 'destination not found' type errors if their respective destinations did not exist.
+
+== Deployment Prerequisites
+
+* Standalone VM where Elasticsearch/Kibana will be deployed(2 vCPU, 16G RAM, 200G SSD)
+* Kubernetes Cluster - Consider using a link:https://cluster-api.sigs.k8s.io/[Cluster-API] provisioned cluster
+* link:https://helm.sh[Helm 3]
+
+== Installing Elasticsearch
+
+Elasticsearch installation is pretty straightforward with many possible OS targets documented at https://www.elastic.co/guide/en/elasticsearch/reference/current/install-elasticsearch.html. I used the 'RPM-based' method on my CentOS 7 VM.
+
+. Import the Elastic PGP Key.
++
+[source,bash]
+----
+rpm --import https://artifacts.elastic.co/GPG-KEY-elasticsearch
+----
+
+. Add the Elasticsearch yum repo to the OS.
++
+[source,bash]
+----
+cat <<EOF > /etc/yum.repos.d/elasticsearch.repo
+[elasticsearch]
+name=Elasticsearch repository for 7.x packages
+baseurl=https://artifacts.elastic.co/packages/7.x/yum
+gpgcheck=1
+gpgkey=https://artifacts.elastic.co/GPG-KEY-elasticsearch
+enabled=0
+autorefresh=1
+type=rpm-md
+EOF
+----
+
+. Install Elasticsearch.
++
+[source,bash]
+----
+yum install --enablerepo=elasticsearch -y elasticsearch
+----
+
+. Basic configuration of Elasticsearch.
++
+[source,bash]
+----
+cat <<EOF > /etc/elasticsearch/elasticsearch.yml
+cluster.name: logging-devel
+node.name: ${HOSTNAME}
+node.attr.role: demo
+path.data: /var/lib/elasticsearch
+path.logs: /var/log/elasticsearch
+bootstrap.memory_lock: true
+network.host: 0.0.0.0
+http.port: 9200
+#discovery.seed_hosts: ["127.0.0.1", "[::1]"]
+cluster.initial_master_nodes: ["${HOSTNAME}"]
+gateway.recover_after_nodes: 1
+action.auto_create_index: true
+EOF
+----
+
+. Enable the Elasticsearch service to start whenever the OS boots, and start the service now.
++
+[source,bash]
+----
+systemctl daemon-reload
+systemctl enable elasticsearch.service
+systemctl start elasticsearch.service
+----
+
+. Elasticsearch by default is configured to run as a cluster to distribute and replicate data for resiliency and search performance. We need to explicitly tell this instance of Elasticsearch *not* to replicate data, as there is only one node. Elasticsearch clustering is out of scope for this document - further info can be found at the link:https://www.elastic.co/guide/en/elasticsearch/reference/current/add-elasticsearch-nodes.html[elastic.co site].
++
+Set default replicas to 0 for all indices. (*This step is not required if you have configured Elasticsearch clustering outside of this document.*)
++
+[source,bash]
+----
+curl -XPUT \
+     -H 'Content-Type: application/json' \
+     -d '{"template":"*", "order":1, "settings":{"number_of_replicas":0}}' \
+     http://localhost:9200/_template/zeroreplicas
+----
+
+=== Install Cerebro for an Operator's UI to monitor Elasticsearch
+
+. Install Docker and start the service.
++
+[source,bash]
+----
+yum install -y docker
+----
+
+. Enable the Docker service to start whenever the OS boots, and start the service now.
++
+[source,bash]
+----
+systemctl daemon-reload
+systemctl enable docker.service
+systemctl start docker.service
+----
+
+. Run the Cerebro docker image, exposing it on port 9000.
++
+[source,bash]
+----
+docker run -d --restart always -p 9000:9000 lmenezes/cerebro
+----
+
+. In your browser, open the URL corresponding to `http://<elasticsearch-hostname>:9000/`. In the `Node address` text entry field, enter `http://<elasticsearch-hostname>:9200`(where `9200` corresponds to the `http.port` value in `/etc/elasticsearch/elasticsearch.yml`).
++
+image:/images/cerebro.png[Cerebro UI Login,100%]
+
+. At this time, your Cerebro dashboard will be empty, with no indices, but the status should be green. We will revisit this later when data is populated into Elasticsearch.
+
+=== Installing Kibana
+
+Like Elasticsearch, Kibana installation is pretty straightforward, documented at https://www.elastic.co/guide/en/kibana/current/install.html. I used the 'RPM-based' method on the same VM as I installed Elasticsearch.
+
+. Import the Elastic PGP Key.
++
+[source,bash]
+----
+rpm --import https://artifacts.elastic.co/GPG-KEY-elasticsearch
+----
+
+. Add the Elasticsearch yum repo to the OS.
++
+[source,bash]
+----
+cat <<EOF > /etc/yum.repos.d/kibana.repo
+[kibana-7.x]
+name=Kibana repository for 7.x packages
+baseurl=https://artifacts.elastic.co/packages/7.x/yum
+gpgcheck=1
+gpgkey=https://artifacts.elastic.co/GPG-KEY-elasticsearch
+enabled=1
+autorefresh=1
+type=rpm-md
+EOF
+----
+
+. Install Kibana.
++
+[source,bash]
+----
+sudo yum install -y kibana
+----
+
+. Basic configuration of Kibana.
++
+[source,bash]
+----
+cat <<EOF > /etc/kibana/kibana.yml
+server.host: "0.0.0.0"
+server.port: 5601
+EOF
+----
+
+. Enable the Kibana service to start whenever the OS boots, and start the service now.
++
+[source,bash]
+----
+systemctl daemon-reload
+systemctl enable kibana.service
+systemctl start kibana.service
+----
+
+. Verify you can see the Kibana dashboard by navigating to `http://<hostname>:5601/`.
++
+At this point, the lab setup for Elasticsearch is complete, and we will move left to deploy Fluentd.
+
+== Deploying Fluentd
+
+Fluentd is the log aggregator and processor stage before Elasticsearch, and we will deploy this now. We will use the link:https://bitnami.com/stack/fluentd/helm[Bitnami Fluentd Helm chart].
+
+. Extend the Bitnami image by installing the `rewrite_tag_filter` plugin. We will push this up to docker hub as a custom image, to be used later.
++
+[source,bash]
+----
+CUSTOM_DOCKER_IMG=georgegoh/fluentd:1.10.4-debian-10-r2-rewrite_tag_filter
+cat <<EOF | docker build -t ${CUSTOM_DOCKER_IMG} -
+FROM bitnami/fluentd:1.10.4-debian-10-r2
+LABEL maintainer "Bitnami <containers@bitnami.com>"
+
+## Install custom Fluentd plugins
+RUN fluent-gem install 'fluent-plugin-rewrite-tag-filter'
+EOF
+docker push ${CUSTOM_DOCKER_IMG}
+----
+
+. Add the Bitnami Helm repo.
++
+[source,bash]
+----
+helm repo add bitnami https://charts.bitnami.com/bitnami
+----
+
+. Create a custom `ConfigMap` that can send output to Elasticsearch. Substitute `ES_HOST=es.lab.example.com` with your own Elasticsearch hostname.
++
+[source,bash]
+----
+ES_HOST=es.lab.example.com
+cat <<EOF | sed "s/<elasticsearch-host>/${ES_HOST}/" > fluentd-elasticsearch-output-configmap.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: fluentd-elasticsearch-output
+  namespace: k8s-system-logging
+data:
+  fluentd.conf: |
+    # Prometheus Exporter Plugin
+    # input plugin that exports metrics
+    <source>
+      @type prometheus
+      port 24231
+    </source>
+
+    # input plugin that collects metrics from MonitorAgent
+    <source>
+      @type prometheus_monitor
+      <labels>
+        host \${hostname}
+      </labels>
+    </source>
+
+    # input plugin that collects metrics for output plugin
+    <source>
+      @type prometheus_output_monitor
+      <labels>
+        host \${hostname}
+      </labels>
+    </source>
+
+    # Ignore fluentd own events
+    <match fluent.**>
+      @type null
+    </match>
+
+    # TCP input to receive logs from the forwarders
+    <source>
+      @type forward
+      bind 0.0.0.0
+      port 24224
+    </source>
+
+    # HTTP input for the liveness and readiness probes
+    <source>
+      @type http
+      bind 0.0.0.0
+      port 9880
+    </source>
+
+    # Throw the healthcheck to the standard output instead of forwarding it
+    <match fluentd.healthcheck>
+      @type stdout
+    </match>
+
+    # rewrite tags based on which namespace the logs come from.
+    <match kube.**>
+      @type rewrite_tag_filter
+      <rule>
+        key     \$['kubernetes']['namespace_name']
+        pattern /^(kube-system|kubeapps|k8s-system-[\S]+)$/
+        tag     ops.\${tag}
+      </rule>
+      <rule>
+        key     \$['kubernetes']['namespace_name']
+        pattern /.+/
+        tag     prod.\${tag}
+      </rule>
+    </match>
+
+    <match ops.kube.**>
+      @type copy
+      @id output_copy_ops
+      <store>
+        @type elasticsearch_dynamic
+        @id output_elasticsearch_ops
+        host <elasticsearch-host>
+        port 9200
+        logstash_format true
+        logstash_prefix kube-ops.\${record['kubernetes']['namespace_name']}
+        <buffer>
+          @type file
+          path /opt/bitnami/fluentd/logs/buffers/ops-logs.buffer
+          flush_thread_count 2
+          flush_interval 5s
+        </buffer>
+      </store>
+    </match>
+
+    <match prod.kube.**>
+      @type copy
+      @id output_copy
+      <store>
+        @type elasticsearch_dynamic
+        @id output_elasticsearch
+        host <elasticsearch-host>
+        port 9200
+        logstash_format true
+        logstash_prefix kube.\${record['kubernetes']['namespace_name']}
+        <buffer>
+          @type file
+          path /opt/bitnami/fluentd/logs/buffers/logs.buffer
+          flush_thread_count 2
+          flush_interval 5s
+        </buffer>
+      </store>
+    </match>
+EOF
+kubectl apply -f fluentd-elasticsearch-output-configmap.yaml
+----
+
+. Install the Fluentd Helm chart. Substitute the `image.repository` and `image.tag` values with the relevant values from step 1.
++
+[source,bash]
+----
+helm install fluentd \
+     --set image.repository=georgegoh/fluentd \
+     --set image.tag=1.10.4-debian-10-r2-rewrite_tag_filter \
+     --set forwarder.enabled=false \
+     --set aggregator.enabled=true \
+     --set aggregator.replicaCount=1 \
+     --set aggregator.port=24224 \
+     --set aggregator.configMap=fluentd-elasticsearch-output \
+     bitnami/fluentd -n k8s-system-logging
+----
++
+
+Consider using a link:https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/[Horizontal Pod Autoscaler] for the `fluentd` StatefulSet to react to higher volumes of incoming logs.
++
+Now that we've completed setup of Fluentd, Elasticsearch and Kibana, it's time to move on to Fluent Bit and complete the logging setup.
+
+== Deploy Fluent Bit
 
 . Save the following in a file called `values.yaml`.
-```
++
+----
 on_minikube: false
 
 image:
@@ -211,12 +537,53 @@ securityContext: {}
 podSecurityContext: {}
   # podSecurityContext:
   #   runAsUser: 1000
-```
+----
 
-[start=2]
 . Install the Fluent Bit helm chart, using values created in the previous step.
-```
++
+[source,bash]
+----
 helm install --name fluent-bit -f values.yaml stable/fluent-bit
-```
+----
 
-. Fluent Bit setup is done here. Next we set up Fluentd. 
+## Viewing the end result
+
+We have completed the deployment of the logging stack and we can now view logs in Kibana by navigating to it's location `http://<kibana-host>:5601/` and clicking on the `Discover` icon.
+
+image:/images/kibana.png[Kibana UI,100%]
+
+### Creating separate views for applications and platform operations logs
+
+. Create the `kube.*` index pattern. Click on the settings icon, then click on `Index Patterns`.
++
+image:/images/kibana-create-index-1.png[Index pattern,100%]
+
+. Click on `Create index pattern`.
++
+image:/images/kibana-create-index-2.png[Create index pattern,100%]
+
+. In the `Index pattern` field, type in `kube.*`. You should see some matches to the pattern you just entered. Click `Next step`.
++
+image:/images/kibana-create-index-3.png[Define index pattern,100%]
+
+. In the `Time Filter field name` field, select `@timestamp`, and then `Create index pattern`.
++
+image:/images/kibana-create-index-4.png[Define time filter,100%]
+
+. Repeat steps 1-4 for the index pattern `kube-ops.*`.
+
+. Navigate back to the `Discover` view, and click on the dropdown list for index patterns. You should be able to see the new index patterns you just created(`kube-ops.*` and `kube.*`). Select `kube-ops.*`.
+
+image:/images/kibana-create-index-5.png[View indices,100%]
+
+. Notice that all logs displayed now are filtered to only come from the `kube-system`, `kubeapps`, and `k8s-system-*` namespaces.
+
+image:/images/kibana-create-index-6.png[Observe filtered logs,100%]
+
+The `kube-ops.*` and `kube.*` indices were created through the use of the Fluentd's `rewrite_tag_filter` and routing capabilities. Now we can see the results in Elasticsearch and Kibana.
+
+### Cerebro
+
+To view the health and status of Elasticsearch, navigate to the Cerebro UI `http://<elasticsearch-hostname>:9000/`. In the `Node address` text entry field, enter `http://<elasticsearch-hostname>:9200`. You should see a dashboard with green status and populated indices.
+
+image:/images/cerebro-dashboard.png[Cerebro UI,100%]

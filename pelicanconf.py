@@ -35,4 +35,6 @@ DEFAULT_PAGINATION = 10
 PLUGIN_PATHS = ["plugins"]
 PLUGINS = ["asciidoc_reader"]
 
-THEME = "notmyidea"
+#THEME = "simple"
+THEME="notmyidea"
+JINJA_ENVIRONMENT = {'extensions': ['jinja2.ext.i18n']}
