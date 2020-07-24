@@ -24,7 +24,7 @@ The first tests are expected to roll out and be generally available before
 November 2020, so it might be a good idea in the meantime, to brush up on
 the fundamentals again and formulate a strategy to prepare for the exam.
 
-Not much material has emerged at this point, so I'll share what I know.
+Not much material has emerged at this point, so I'll share what I know in this post.
 
 == Exam Format
 
@@ -72,4 +72,4 @@ The detailed breakdown of each competency is documented in the
 link:https://github.com/cncf/curriculum/blob/master/CKS_Curriculum_%20v1.19%20Coming%20Soon%20November%202020.pdf[CKS Curriculum].
 
 Over the coming weeks(or months), as I prepare for the CKS, I'll document my journey and
-share it here for the curious.
+share it here for the curious. Stay tuned!
