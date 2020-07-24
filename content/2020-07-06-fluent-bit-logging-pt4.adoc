@@ -44,14 +44,14 @@ image:/images/kibana-create-index-4.png[Define time filter,100%]
 . Repeat steps 1-4 for the index pattern `kube-ops.*`.
 
 . Navigate back to the `Discover` view, and click on the dropdown list for index patterns. You should be able to see the new index patterns you just created(`kube-ops.*` and `kube.*`). Select `kube-ops.*`.
-
++
 image:/images/kibana-create-index-5.png[View indices,100%]
 
 . Notice that all logs displayed now are filtered to only come from the `kube-system`, `kubeapps`, and `k8s-system-*` namespaces.
 
 image:/images/kibana-create-index-6.png[Observe filtered logs,100%]
 
-The `kube-ops.*` and `kube.*` indices were created through the use of the Fluentd's `rewrite_tag_filter` and routing capabilities. Now we can see the results in Elasticsearch and Kibana.
+The `kube-ops.\*` and `kube.\*` indices were created through the use of the Fluentd's `rewrite_tag_filter` and routing capabilities. Now we can see the results in Elasticsearch and Kibana.
 
 === Cerebro
 

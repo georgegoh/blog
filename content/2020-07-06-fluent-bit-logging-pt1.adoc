@@ -27,7 +27,7 @@ Elasticsearch is deployed external to the cluster, instead of inside Kubernetes.
 
 Finally, there are two points of access. First is the log viewer, who views logs through the Kibana web UI. Then there is the Elasticsearch operator, who uses Cerebro to view Elasticsearch health.
 
-image::/images/fluent-bit-fluentd-es-arch.drawio.svg[Logging Arch,100%]
+image:/images/fluent-bit-fluentd-es-arch.drawio.svg[Logging Arch,100%]
 
 === Design Considerations
 
@@ -36,7 +36,7 @@ image::/images/fluent-bit-fluentd-es-arch.drawio.svg[Logging Arch,100%]
 We will deploy both Fluent Bit and Fluentd in this architecture. The assumption is that we want to capitalize on the small CPU and memory footprint of Fluent Bit, while leveraging on the large plugin ecosystem available for Fluentd. There are also situations where removing the Fluentd aggregator makes sense too - balance your decision with the functionality required in your use case.
 
 .Fluentd vs Fluent Bit(screenshot taken May 28, 2020 - https://docs.fluentbit.io/manual/about/fluentd-and-fluent-bit)
-image::/images/fluentd-v-fluent-bit.png[Fluentd vs Fluent Bit]
+image:/images/fluentd-v-fluent-bit.png[Fluentd vs Fluent Bit]
 
 As seen above, the memory footprint for Fluentd can be ~60x of Fluent Bit.
 
