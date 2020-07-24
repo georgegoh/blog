@@ -1,0 +1,75 @@
+= Certified Kubernetes Security Specialist (CKS) First Looks
+
+:title: First Looks at the Certified Kubernetes Security Specialist (CKS)
+:date: 2020-07-24
+:tags: kubernetes, security, certification
+:slug: cks-first-looks
+:authors: George Goh
+:summary: Certified Kubernetes Security Specialist Overview
+
+On July 15 2020, the Cloud Native Computing Foundation(CNCF) 
+link:https://www.cncf.io/blog/2020/07/15/certified-kubernetes-security-specialist-cks-coming-in-november/[announced]
+a new certification program for Kubernetes named the 
+link:https://training.linuxfoundation.org/certification/certified-kubernetes-security-specialist/[Certified Kubernetes Security Specialist],
+or the CKS for short. This brings the total number of CNCF Kubernetes
+certifications to 3 - with the prior ones being the 
+link:https://www.cncf.io/certification/cka/[Certified Kubernetes Administrator], and the
+link:https://www.cncf.io/certification/ckad/[Certified Kubernetes Application Developer]).
+
+This certification comes at a time when many enterprises are starting to
+expand and map out their container strategy, and need to shift their
+operations and development teams into gear with security best practices.
+
+The first tests are expected to roll out and be generally available before
+November 2020, so it might be a good idea in the meantime, to brush up on
+the fundamentals again and formulate a strategy to prepare for the exam.
+
+Not much material has emerged at this point, so I'll share what I know.
+
+== Exam Format
+
+The CKS test will be online, proctored and performance-based, and candidates
+have 120 minutes to complete the test.
+
+This is the same deal as the CKA and CKAD exams, so the same strategies would
+apply:
+
+* Read through all questions before attempting any of them.
+* Rank them in the order of easy to hard, and how time-consuming the task is.
+* Attack the easiest and least time-consuming questions first.
+
+Remember this is a test of your skill, as well as your time management. Don't
+dwell longer than necessary on a single question when you can easily score
+on another.
+
+Kubernetes v1.19 is used in the exam, so practice with that version in your
+environment.
+
+== Certification Path
+
+The first 2 Kubernetes certifications (the CKA and CKAD) are standalone and you
+are free to take them in the order you choose.
+
+However, the CKS assumes the candidate already has competencies in Kubernetes,
+and therefore requires the CKA as a prerequisite prior to attempting the CKS.
+
+If you haven't attained the CKA, and need some help, then check out
+link:https://www.udemy.com/course/certified-kubernetes-administrator-with-practice-tests/[Mumshad Mannambeth's CKA prep course].
+It's probably the only resource that you need to pass the CKA.
+
+== What You Need To Know
+
+The broad split of competencies tested are:
+
+* Cluster Setup – 10%
+* Cluster Hardening – 15%
+* System Hardening – 15%
+* Minimize Microservice Vulerabilities – 20%
+* Supply Chain Security – 20%
+* Monitoring, Logging and Runtime Security – 20%
+
+The detailed breakdown of each competency is documented in the
+link:https://github.com/cncf/curriculum/blob/master/CKS_Curriculum_%20v1.19%20Coming%20Soon%20November%202020.pdf[CKS Curriculum].
+
+Over the coming weeks(or months), as I prepare for the CKS, I'll document my journey and
+share it here for the curious.
