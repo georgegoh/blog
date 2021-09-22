@@ -181,6 +181,13 @@ Now that we've completed setup of Fluentd, Elasticsearch and Kibana, it's time t
 
 == Deploy Fluent Bit
 
+. Add the Fluent Helm repo.
++
+[source,bash]
+----
+helm repo add fluent https://fluent.github.io/helm-charts
+----
+
 . Save the following in a file called `values.yaml`.
 +
 ----

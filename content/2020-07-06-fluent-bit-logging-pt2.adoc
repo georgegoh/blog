@@ -77,6 +77,27 @@ action.auto_create_index: true
 EOF
 ----
 
+. Elasticsearch needs to be able to allocate more than the default amount of memory in systemd. Override the defaults:
++
+[source,bash]
+----
+mkdir -p /etc/systemd/system/elasticsearch.service.d/
+cat <<EOF > /etc/systemd/system/elasticsearch.service.d/override.conf
+[Service]
+LimitMEMLOCK=infinity
+EOF
+
+systemctl daemon-reload
+----
+
+. Open the firewall to allow traffic into Elasticsearch.
++
+[source,bash]
+----
+firewall-cmd --add-port=9200/tcp --permanent
+firewall-cmd --reload
+----
+
 . Enable the Elasticsearch service to start whenever the OS boots, and start the service now.
 +
 [source,bash]
@@ -171,6 +192,14 @@ cat <<EOF > /etc/kibana/kibana.yml
 server.host: "0.0.0.0"
 server.port: 5601
 EOF
+----
+
+. Open the firewall to allow traffic into Kibana.
++
+[source,bash]
+----
+firewall-cmd --add-port=5601/tcp --permanent
+firewall-cmd --reload
 ----
 
 . Enable the Kibana service to start whenever the OS boots, and start the service now.
